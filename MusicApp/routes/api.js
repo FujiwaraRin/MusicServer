@@ -51,5 +51,161 @@ router.post('/add-playlist', async (req, res) => {
     }
 });
 
+//-----Delete playlist by id
+router.delete('/delele-playlist-by-id/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const result = await Playlists.findByIdAndDelete(id);
+        if (result) {
+            res.json({
+                "status": 200,
+                "message": "Xoá thành công",
+                "data": result
+            })
+        } else {
+            res.json({
+                "status": 400,
+                "message": "Lỗi, xoá ko thành công",
+                "data":{}
+            })
+        }
+    } catch (error) {
+        console.log(error);
+    }
+})
+
+//-----Get list playlist
+router.get('/get-list-playlist', async (req, res) => {
+    try {
+        const data = await Playlists.find()
+        .populate('playlistItems')
+        .sort({ createAt: -1 });
+        if (data) {
+            res.json({
+                "status": 200,
+                "message": "Thành công",
+                "data": data
+            })
+        } else {
+            res.json({
+                "status": 400,
+                "message": "Lỗi, không thành công",
+                "data": []
+            })
+        }
+    } catch (error) {
+        console.log(error);
+    }
+});
+//-----Get list playlist by user id
+router.get('/get-list-playlist/:id_user', async (req, res) => {
+    try {
+        const { id_user } = req.params;
+        console.log('Requested id_user:', id_user);
+
+        const playlists = await Playlists.find({ id_user }).populate('playlistItems');
+        console.log('Playlists found:', playlists);
+        
+        if (playlists.length > 0) {
+            res.json({
+                "status": 200,
+                "message": "Success",
+                "data": playlists
+            });
+        } else {
+            res.status(400).json({
+                "status": 400,
+                "message": "Failed",
+                "data": []
+            });
+        }
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({
+            "status": 500,
+            "message": "Server Error",
+            "error": error.message
+        });
+    }
+});
+
+//Get playlist by user id
+router.get('/get-playlist/:id_user', async (req, res) => {
+    try {
+        const { id_user } = req.params;
+        const playlists = await Playlists.find({ id_user }).select('_id name');
+        if (playlists.length > 0) {
+            res.json({
+                "status": 200,
+                "message": "Success",
+                "data": playlists
+            });
+        } else {
+            res.status(400).json({
+                "status": 400,
+                "message": "Failed",
+                "data": []
+            });
+        }
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({
+            "status": 500,
+            "message": "Server Error",
+            "error": error.message
+        });
+    }
+});
+
+//-----Get list playlist item by id_playlist
+router.get('/get-list-playlist-item/:id_playlist', async (req, res) => {
+    try {
+        const { id_playlist } = req.params;
+        const playlistItems = await PlaylistItems.find({ id_playlist });
+        if (playlistItems.length > 0) {
+            res.json({
+                "status": 200,
+                "message": "Success",
+                "data": playlistItems
+            });
+        } else {
+            res.status(400).json({
+                "status": 400,
+                "message": "Failed",
+                "data": []
+            });
+        }
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({
+            "status": 500,
+            "message": "Server Error",
+            "error": error.message
+        });
+    }
+});
+
+//-----Delete playlist by id
+router.delete('/delele-playlist-item-by-id/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const result = await PlaylistItems.findByIdAndDelete(id);
+        if (result) {
+            res.json({
+                "status": 200,
+                "message": "Xoá thành công",
+                "data": result
+            })
+        } else {
+            res.json({
+                "status": 400,
+                "message": "Lỗi, xoá ko thành công",
+                "data": {}
+            })
+        }
+    } catch (error) {
+        console.log(error);
+    }
+})
 
 module.exports = router;
