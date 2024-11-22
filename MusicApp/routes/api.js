@@ -207,5 +207,76 @@ router.delete('/delele-playlist-item-by-id/:id', async (req, res) => {
         console.log(error);
     }
 })
+//-----Add playlist item
+router.post('/add-playlist-item', async (req, res) => {
+    try {
+        const data = req.body;
 
+        // Lấy thông tin playlist để tìm id_user
+        const playlist = await Playlists.findById(data.id_playlist).populate('id_user');
+        if (!playlist) {
+            return res.status(404).json({
+                status: 404,
+                message: "Playlist không tồn tại",
+                data: {}
+            });
+        }
+
+        // Lấy thông tin user từ playlist
+        const user = await Users.findById(playlist.id_user);
+        if (!user) {
+            return res.status(404).json({
+                status: 404,
+                message: "Người dùng không tồn tại",
+                data: {}
+            });
+        }
+
+        // Kiểm tra xem id_track đã tồn tại trong playlist chưa
+        const isTrackExist = await PlaylistItems.findOne({
+            id_playlist: data.id_playlist,
+            id_track: data.id_track
+        });
+
+        if (isTrackExist) {
+            return res.status(400).json({
+                status: 400,
+                message: "Bài hát đã tồn tại trong playlist",
+                data: {}
+            });
+        }
+
+        // Kiểm tra số coin của user
+    
+
+            // Tạo PlaylistItem mới
+            const newPlaylistItem = new PlaylistItems({
+                id_playlist: data.id_playlist,
+                id_track: data.id_track,
+                name: data.name,
+                image_url: data.image_url,
+                preViewUrl: data.preViewUrl,
+                artist: data.artist,
+            });
+            const result = await newPlaylistItem.save();
+
+            // Cập nhật playlist với playlistItem mới
+            await Playlists.findByIdAndUpdate(data.id_playlist, { $push: { playlistItems: result._id } });
+
+            return res.json({
+                status: 200,
+                message: "Thêm thành công",
+                data: result
+            });
+        
+        
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({
+            status: 500,
+            message: "Lỗi server",
+            error: error.message
+        });
+    }
+});
 module.exports = router;
