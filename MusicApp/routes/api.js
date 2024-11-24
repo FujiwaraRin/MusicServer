@@ -418,4 +418,43 @@ router.delete('/delele-history-item-by-id/:id', async (req, res) => {
         console.log(error);
     }
 })
+
+//-----Register
+router.post('/register', async (req, res) => {
+    try {
+        const data = req.body;
+        const newUser = Users({
+            username: data.username,
+            password: data.password,
+            email: data.email,
+            name: data.name,
+            avatar: data.avatar,
+            coin: data.coin,
+        })
+        const result = await newUser.save()
+        if (result) { //Gửi mail
+            const mailOptions = {
+                from: "kieumo54@gmail.com", //email gửi đi
+                to: result.email, // email nhận
+                subject: "Đăng ký thành công", //subject
+                text: "Cảm ơn bạn đã đăng ký", // nội dung mail
+            };
+            // Nếu thêm thành công result !null trả về dữ liệu
+            await Transporter.sendMail(mailOptions); // gửi mail
+            res.json({
+                "status": 200,
+                "message": "Thêm thành công",
+                "data": result
+            })
+        } else {// Nếu thêm không thành công result null, thông báo không thành công
+            res.json({
+                "status": 400,
+                "message": "Lỗi, thêm không thành công",
+                "data": {}
+            })
+        }
+    } catch (error) {
+        console.log(error);
+    }
+})
 module.exports = router;
