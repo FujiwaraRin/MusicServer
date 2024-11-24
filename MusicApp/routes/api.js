@@ -279,4 +279,143 @@ router.post('/add-playlist-item', async (req, res) => {
         });
     }
 });
+
+//-----Add history
+router.post('/add-history', async (req, res) => {
+    try {
+        const data = req.body; 
+        const newHistory = new Histories({
+            id_user: data.id_user,
+        });
+        const result = await newHistory.save(); 
+        if (result) {
+            res.json({
+                "status": 200,
+                "message": "Thêm thành công",
+                "data": result
+            })
+        } else {
+            // Nếu ko thành công, hiện thông báo
+            res.json({
+                "status": 400,
+                "message": "Lỗi, thêm không thành công",
+                "data": {}
+            })
+        }
+    } catch (error) {
+        console.log(error);
+    }
+});
+
+//-----Add history item
+router.post('/add-history-item', async (req, res) => {
+    try {
+        const data = req.body; // Lấy dữ liệu từ body
+        const newHistoryItem = new HistoryItems({
+            id_history: data.id_history,
+            id_track: data.id_track,
+            name: data.name,
+            image_url: data.image_url,
+            preViewUrl: data.preViewUrl,
+            artist: data.artist,
+        });// Tạo một đối tượng mới
+        const result = await newHistoryItem.save();
+        await Histories.findByIdAndUpdate(data.id_history, { $push: { historyItems: result._id } });
+        if (result) {
+            // Nếu thêm thành công result !null trả về dữ liệu
+            res.json({
+                "status": 200,
+                "message": "Thêm thành công",
+                "data": result
+            })
+        } else {
+            // Nếu ko thành công, hiện thông báo
+            res.json({
+                "status": 400,
+                "message": "Lỗi, thêm không thành công",
+                "data": {}
+            })
+        }
+    } catch (error) {
+        console.log(error);
+    }
+})
+
+//-----Get history by user id
+router.get('/get-history/:id_user', async(req, res)=>{
+    try {
+        const { id_user } = req.params;
+        console.log('Requested id_user:', id_user);
+
+        const history = await Histories.findOne({ id_user }).populate('historyItems');
+        console.log('history found:', history);
+        
+        if (history != null) {
+            res.json({
+                "status": 200,
+                "message": "Success",
+                "data": history
+            });
+        } else {
+            res.status(400).json({
+                "status": 400,
+                "message": "Failed",
+                "data": []
+            });
+        }
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({
+            "status": 500,
+            "message": "Server Error",
+            "error": error.message
+        });
+    }
+})
+
+//-----Get list history items by history id
+router.get('/get-history-items/:id_history', async (req, res) => {
+    try {
+        const { id_history } = req.params;
+        const historyItems = await HistoryItems.find({ id_history: id_history }).populate('id_history');
+        if (historyItems.length > 0) {
+            res.json({
+                "status": 200,
+                "message": "Get historyItems success",
+                "data": historyItems
+            });
+        } else {
+            res.json({
+                "status": 400,
+                "message": "Not found",
+                "data": []
+            });
+        }
+    } catch (error) {
+        console.log(error);
+    }
+})
+
+//-----Delete history item by id
+router.delete('/delele-history-item-by-id/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const result = await HistoryItems.findByIdAndDelete(id);
+        if (result) {
+            res.json({
+                "status": 200,
+                "message": "Xoá thành công",
+                "data": result
+            })
+        } else {
+            res.json({
+                "status": 400,
+                "message": "Lỗi, xoá ko thành công",
+                "data": {}
+            })
+        }
+    } catch (error) {
+        console.log(error);
+    }
+})
 module.exports = router;
