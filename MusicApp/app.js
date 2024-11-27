@@ -41,3 +41,6 @@ app.use(function(err, req, res, next) {
 });
 
 module.exports = app;
+// bo xung them code
+// add game
+// add user
