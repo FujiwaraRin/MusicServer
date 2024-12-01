@@ -8,5 +8,5 @@ const Comments = new Scheme({
 },{
     timestamps: true
 })
-
+// add fix buff
 module.exports = mongoose.model('comment', Comments)

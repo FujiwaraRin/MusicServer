@@ -7,5 +7,5 @@ const Histories = new Scheme({
 },{
     timestamps: true
 })
-
+// add fix buff
 module.exports = mongoose.model('history', Histories)
