@@ -41,3 +41,7 @@ app.use(function(err, req, res, next) {
 });
 
 module.exports = app;
+
+// linh tinh
+//linh tinh2
+//linh tinh 3
